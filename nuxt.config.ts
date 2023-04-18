@@ -7,12 +7,14 @@ export default defineNuxtConfig({
     },
     preset: "aws-lambda",
   },
-  alias: {
-    "./runtimeConfig": "./runtimeConfig.browser"
-  },
   vite: {
     define: {
       "window.global": {}
+    },
+    resolve: {
+      alias: {
+        './runtimeConfig': './runtimeConfig.browser'
+      }
     }
   },
 })

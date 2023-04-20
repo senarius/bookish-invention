@@ -1,58 +1,18 @@
 import { defineStore } from 'pinia'
 import { v4 as uuid } from 'uuid'
-
-export interface Book {
-  id: string
-  title: string
-  author: string
-  done: boolean
-  createdAt: Date
-  updatedAt: Date
-}
-
-export type Books = Book[] | undefined[]
-
-export interface BookAdd {
-  title: string
-  author: string
-  done: boolean
-}
-
-export interface BookUpdate {
-  title?: string
-  author?: string
-  done?: boolean
-}
-
-export interface BookState {
-  items: Books
-  comments: Comments
-}
+import axios from 'axios'
+import { Book, BookAdd, BookUpdate, Books, BookState } from '../types/book'
+import { Comment, CommentAdd } from '../types/comment'
 
 const state = (): BookState => ({
   items: [],
   comments: [],
 })
 
-export interface Comment {
-  id: string
-  remark: string
-  bookId: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface CommentAdd {
-  remark: string
-  bookId: string
-}
-
-export type Comments = Comment[] | undefined[]
-
 const getters = {
   getbookById: (state: BookState) => {
     return (id: string) =>
-      state.items.find((item) => !!item && (item as Book).id === id)
+      state.items.find((item) => !!item && (item as Book)._id === id)
   },
   getSortedBooks: (state: BookState) => {
     return [...state.items].sort(
@@ -70,33 +30,96 @@ export const useBookStore = defineStore('bookStore', {
   state,
   getters,
   actions: {
-    add(partialBook: BookAdd) {
+    async add(partialBook: BookAdd) {
       const item: Book = {
-        id: uuid(),
+        _id: uuid(),
         ...partialBook,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
-      this.items.push(item)
+      try {
+        const data = await useFetch(`/add-book/`, { baseURL: useRuntimeConfig().public.apiBase, method: 'POST', body: item })
+          if (data.data.value) {
+            this.items = data.data.value.books
+          }
+        }
+        catch (error) {
+          console.log(error)
+      }
     },
-    addComment(partialComment: CommentAdd) {
+    async addComment(partialComment: CommentAdd) {
       const item: Comment = {
-        id: uuid(),
+        _id: uuid(),
         ...partialComment,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
-      this.comments.push(item)
+      try {
+        const data = await useFetch(`/add-comment/`, { baseURL: useRuntimeConfig().public.apiBase, method: 'POST', body: item })
+          if (data.data.value) {
+            this.comments = data.data.value.comments
+          }
+        }
+        catch (error) {
+          console.log(error)
+      }
     },
-    remove(id: string) {
-      this.items = this.items.filter((item) => item.id !== id)
+    async remove(id: string) {
+      try {
+        const data = await useFetch(`/delete-book/${id}`, { baseURL: useRuntimeConfig().public.apiBase, method: 'DELETE' })
+        if (data.data.value) {
+          this.items = data.data.value.books
+        }
+      }
+      catch (error) {
+        console.log(error)
+      }
     },
-    removeComment(id: string) {
-      this.comments = this.comments.filter((item) => item.id !== id)
+    async removeComment(id: string) {
+      try {
+        const data = await useFetch(`/delete-comment/${id}`, { baseURL: useRuntimeConfig().public.apiBase, method: 'DELETE' })
+        if (data.data.value) {
+          this.comments = data.data.value.comments
+        }
+      }
+      catch (error) {
+        console.log(error)
+      }
     },
-    update(id: string, update: BookUpdate) {
-      const idx = this.items.findIndex((item) => item.id === id)
+    async update(id: string, update: BookUpdate) {
+      try {
+        const data = await useFetch(`/edit-book/${id}`, { baseURL: useRuntimeConfig().public.apiBase, method: 'PUT', body: update })
+          if (data.data.value) {
+            this.items = data.data.value.books
+          }
+        }
+        catch (error) {
+          console.log(error)
+      }
+      const idx = this.items.findIndex((item) => item._id === id)
       this.items[idx] = { ...this.items[idx], ...update, updatedAt: new Date() }
     },
+    async fetchBooks() {
+      try {
+        const data = await useFetch('/books', { baseURL: useRuntimeConfig().public.apiBase })
+          if (data.data.value) {
+            this.items = data.data.value.books
+          }
+        }
+        catch (error) {
+          console.log(error)
+      }
+    },
+    async fetchComments() {
+      try {
+        const data = await useFetch(`/comments`, { baseURL: useRuntimeConfig().public.apiBase })
+          if (data.data.value) {
+            this.comments = data.data.value.comments
+          }
+        }
+        catch (error) {
+          console.log(error)
+      }
+    }
   },
 })

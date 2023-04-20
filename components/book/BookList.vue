@@ -6,12 +6,13 @@
       <th>Date</th>
       <th>Actions</th>
     </tr>
-    <book-item v-for="item in items" :key="item.id" :book="item" />
+    <book-item v-for="item in items" :key="item._id" :book="item" />
   </table>
 </template>
 
 <script lang="ts" setup>
-  import { Books } from "~~/store/book"
+  import { Books } from "~~/types/book"
+
   defineProps<{
     items: Books
   }>();

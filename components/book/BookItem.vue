@@ -34,19 +34,19 @@
       />
       <x-circle-icon
         class="w-10 h-10 transition-all duration-200 text-red-400 cursor-pointer hover:text-red-600"
-        @click="deleteBook(book.id)"
+        @click="deleteBook(book._id)"
       />
     </td>
   </list-item-container>
   <comment-input v-model="newComment" @save="saveNewComment(book)" :error="error" ></comment-input>
-  <comment-list :items="bookStore.getCommentsByBook(book.id)" ></comment-list>
+  <comment-list :items="bookStore.getCommentsByBook(book._id)" ></comment-list>
   
 </template>
 
 <script lang="ts" setup>
   import { XCircleIcon, CheckCircleIcon } from "@heroicons/vue/outline/index.js"
   import { useBookStore } from "~~/store/book";
-  import { Book } from "~~/store/book"
+  import { Book } from "~~/types/book"
   const props = defineProps<{
     book: Book;
   }>();
@@ -54,7 +54,7 @@
   const deleteBook = (id: string) => bookStore.remove(id)
   const updateBookDone = (book: Book) => {
     const currentState = book.done
-    bookStore.update(book.id, { done: !currentState })
+    bookStore.update(book._id, { done: !currentState })
   };
   const parsedDate = computed(() =>
     new Intl.DateTimeFormat("en-US").format(new Date(props.book.createdAt))
@@ -74,7 +74,7 @@
 
     bookStore.addComment({
       remark: newComment.value,
-      bookId: book.id,
+      bookId: book._id,
     })
   }
 </script>

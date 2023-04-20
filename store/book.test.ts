@@ -11,11 +11,11 @@ import {
 import { useBookStore } from './book'
 
 function getFirstId(store: ReturnType<typeof useBookStore>) {
-  return store.items[0].id
+  return store.items[0]._id
 }
 
 function getFirstCommentId(store: ReturnType<typeof useBookStore>) {
-  return store.comments[0].id
+  return store.comments[0]._id
 }
 
 beforeAll(() => {
@@ -25,7 +25,7 @@ beforeAll(() => {
   global.$fetch = async () => {
     return {
       data: {
-        id: '1234',
+        _id: '1234',
         title: 'The Witcher',
         author: 'Andrzej Sapkowski',
         done: false,
@@ -79,7 +79,7 @@ describe('useBookStore', () => {
 
     expect(store.items).toStrictEqual([
       {
-        id: expect.any(String),
+        _id: expect.any(String),
         title: 'The Witcher',
         author: 'Andrzej Sapkowski',
         done: false,
@@ -98,7 +98,7 @@ describe('useBookStore', () => {
 
     const book = store.items[0]
 
-    const item = store.getbookById(book.id)
+    const item = store.getbookById(book._id)
     expect(item.title).toBe('The Witcher')
   })
 
@@ -166,14 +166,14 @@ describe('useBookStore', () => {
 
     await store.addComment({
       remark: 'comment 1',
-      bookId: book.id
+      bookId: book._id
     })
     await store.addComment({
       remark: 'comment 2',
-      bookId: book.id
+      bookId: book._id
     })
     expect(store.comments.length).toBe(2)
-    expect(store.getCommentsByBook(book.id).length).toBe(2)
+    expect(store.getCommentsByBook(book._id).length).toBe(2)
   })
 
   test('deletes a comment', async () => {
@@ -192,21 +192,21 @@ describe('useBookStore', () => {
     expect(store.comments).toStrictEqual([])
   })
 
-  // test("fetches books", async () => {
-  //   // @ts-ignore
-  //   global.$fetch = () => ({
-  //     data: [
-  //       {
-  //         id: "1234",
-  //         title: "The Witcher",
-  //         done: false,
-  //         createdAt: new Date(),
-  //         updatedAt: new Date(),
-  //       },
-  //     ],
-  //   });
+  test("fetches books", async () => {
+    // @ts-ignore
+    global.$fetch = () => ({
+      data: [
+        {
+          _id: "1234",
+          title: "The Witcher",
+          done: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+    });
 
-  //   await store.fetchbooks();
-  //   expect(store.items.length).toBeGreaterThan(0);
-  // });
+    await store.fetchBooks();
+    expect(store.items.length).toBeGreaterThan(0);
+  });
 })

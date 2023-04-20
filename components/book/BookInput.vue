@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Book } from "~~/store/book"
+  import { Book } from "~~/types/book"
 
   const props = defineProps<{
     modelValue: Book

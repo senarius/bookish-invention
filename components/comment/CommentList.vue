@@ -5,8 +5,8 @@
 </template>
 
 <script lang="ts" setup>
-  import { Comments } from "~~/types/comment"
-  defineProps<{
-    items: Comments
-  }>();
+import { Comments } from '~~/types/comment'
+defineProps<{
+  items: Comments
+}>()
 </script>

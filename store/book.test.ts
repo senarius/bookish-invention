@@ -7,8 +7,10 @@ import {
   beforeEach,
   afterEach,
   afterAll,
+  vi
 } from 'vitest'
 import { useBookStore } from './book'
+import { ref } from 'vue'
 
 function getFirstId(store: ReturnType<typeof useBookStore>) {
   return store.items[0]._id
@@ -19,10 +21,22 @@ function getFirstCommentId(store: ReturnType<typeof useBookStore>) {
 }
 
 beforeAll(() => {
+  vi.mock('#imports', () => {
+    return {
+      useRuntimeConfig() {
+        return {
+          public: {
+            apiBase: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:4000/',
+          }
+        }
+      }
+    }
+  })
+
   setActivePinia(createPinia())
 
   // @ts-ignore
-  global.$fetch = async () => {
+  global.useFetch = async () => {
     return {
       data: {
         _id: '1234',
@@ -34,13 +48,10 @@ beforeAll(() => {
       },
     }
   }
-
-  // @ts-ignore
-  global.useRequestHeaders = () => 'cookier'
 })
 
 afterAll(() => {
-  global.$fetch = $fetch
+  global.useFetch = useFetch
 })
 
 describe('initializes', () => {
@@ -69,13 +80,35 @@ describe('useBookStore', () => {
   })
 
   test('adds a book', async () => {
+    const data = ref({
+      book: {
+        _id: '1234',
+        title: 'The Witcher',
+        author: 'Andrzej Sapkowski',
+        done: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      books: [
+        {
+          _id: '1234',
+          title: 'The Witcher',
+          author: 'Andrzej Sapkowski',
+          done: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+    })
+
+    // @ts-ignore
+    global.useFetch = () => ({ data: data })
+
     await store.add({
       title: 'The Witcher',
       author: 'Andrzej Sapkowski',
       done: false,
     })
-
-    console.log(store.items)
 
     expect(store.items).toStrictEqual([
       {
@@ -137,7 +170,8 @@ describe('useBookStore', () => {
       done: false,
     })
     const id = getFirstId(store)
-    store.remove(id)
+
+    await store.remove(id)
     expect(store.items).toStrictEqual([])
   })
 
@@ -157,6 +191,7 @@ describe('useBookStore', () => {
 
   test('gets comments by book id', async () => {
     await store.add({
+      _id: '1234',
       title: 'The Witcher',
       author: 'Andrzej Sapkowski',
       done: false,
@@ -164,49 +199,68 @@ describe('useBookStore', () => {
 
     const book = store.items[0]
 
+    const data = ref({
+      comments: [
+        {
+          _id: '2222',
+          remark: 'comment 1',
+          bookId: book._id,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+    })
+
+    // @ts-ignore
+    global.useFetch = () => ({ data: data })
+
     await store.addComment({
       remark: 'comment 1',
-      bookId: book._id
+      bookId: book._id,
     })
-    await store.addComment({
-      remark: 'comment 2',
-      bookId: book._id
-    })
-    expect(store.comments.length).toBe(2)
-    expect(store.getCommentsByBook(book._id).length).toBe(2)
+
+    expect(store.comments.length).toBe(1)
+    expect(store.getCommentsByBook(book._id).length).toBe(1)
   })
 
   test('deletes a comment', async () => {
-    await store.add({
-      title: 'Delete me',
-      author: 'Andrzej Sapkowski',
-      done: false,
+
+    const data = ref({
+      comments: [],
+      comment: {
+        _id: '2222',
+        remark: 'comment 1',
+        bookId: '1234',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     })
-    const bookId = getFirstId(store)
-    await store.addComment({
-      remark: 'Delete me',
-      bookId: bookId
-    })
-    const id = getFirstCommentId(store)
-    store.removeComment(id)
+
+    // @ts-ignore
+    global.useFetch = () => ({ data: data })
+
+    await store.removeComment('2222')
     expect(store.comments).toStrictEqual([])
   })
 
-  test("fetches books", async () => {
-    // @ts-ignore
-    global.$fetch = () => ({
-      data: [
+  test('fetches books', async () => {
+    const data = ref({
+      books: [
         {
-          _id: "1234",
-          title: "The Witcher",
+          _id: '1234',
+          title: 'The Witcher',
+          author: 'Andrzej Sapkowski',
           done: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       ],
-    });
+    })
 
-    await store.fetchBooks();
-    expect(store.items.length).toBeGreaterThan(0);
-  });
+    // @ts-ignore
+    global.useFetch = () => ({ data: data })
+
+    await store.fetchBooks()
+    expect(store.items.length).toBeGreaterThan(0)
+  })
 })

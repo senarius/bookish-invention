@@ -1,5 +1,5 @@
 <template>
-  <list-item-container :class="{'bg-green-300': book.done,}">
+  <list-item-container :class="{ 'bg-green-300': book.done }">
     <td>
       <h1
         class="text-2xl text-gray-700 select-none font-light uppercase"
@@ -38,43 +38,46 @@
       />
     </td>
   </list-item-container>
-  <comment-input v-model="newComment" @save="saveNewComment(book)" :error="error" ></comment-input>
-  <comment-list :items="bookStore.getCommentsByBook(book._id)" ></comment-list>
-  
+  <comment-input
+    v-model="newComment"
+    @save="saveNewComment(book)"
+    :error="error"
+  ></comment-input>
+  <comment-list :items="bookStore.getCommentsByBook(book._id)"></comment-list>
 </template>
 
 <script lang="ts" setup>
-  import { XCircleIcon, CheckCircleIcon } from "@heroicons/vue/outline/index.js"
-  import { useBookStore } from "~~/store/book";
-  import { Book } from "~~/types/book"
-  const props = defineProps<{
-    book: Book;
-  }>();
-  const bookStore = useBookStore()
-  const deleteBook = (id: string) => bookStore.remove(id)
-  const updateBookDone = (book: Book) => {
-    const currentState = book.done
-    bookStore.update(book._id, { done: !currentState })
-  };
-  const parsedDate = computed(() =>
-    new Intl.DateTimeFormat("en-US").format(new Date(props.book.createdAt))
-  )
-  
-  // comment per book
-  const newComment = ref('')
-  const error = ref(false)
+import { XCircleIcon, CheckCircleIcon } from '@heroicons/vue/outline/index.js'
+import { useBookStore } from '~~/store/book'
+import { Book } from '~~/types/book'
+const props = defineProps<{
+  book: Book
+}>()
+const bookStore = useBookStore()
+const deleteBook = (id: string) => bookStore.remove(id)
+const updateBookDone = (book: Book) => {
+  const currentState = book.done
+  bookStore.update(book._id, { done: !currentState })
+}
+const parsedDate = computed(() =>
+  new Intl.DateTimeFormat('en-US').format(new Date(props.book.createdAt))
+)
 
-  const saveNewComment = (book: Book) => {
-    error.value = false
+// comment per book
+const newComment = ref('')
+const error = ref(false)
 
-    if (newComment.value.length <= 0) {
-      error.value = true
-      return
-    }
+const saveNewComment = (book: Book) => {
+  error.value = false
 
-    bookStore.addComment({
-      remark: newComment.value,
-      bookId: book._id,
-    })
+  if (newComment.value.length <= 0) {
+    error.value = true
+    return
   }
+
+  bookStore.addComment({
+    remark: newComment.value,
+    bookId: book._id,
+  })
+}
 </script>

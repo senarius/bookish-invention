@@ -6,7 +6,7 @@
         :title="comment.remark"
       >
         {{ comment.remark }}
-    </p>
+      </p>
       <p>
         <small class="text-gray-400">
           {{ parsedDate }}
@@ -23,15 +23,15 @@
 </template>
 
 <script lang="ts" setup>
-  import { XCircleIcon } from "@heroicons/vue/outline/index.js"
-  import { useBookStore } from "~~/store/book";
-  import { Comment } from "~~/types/comment"
-  const props = defineProps<{
-    comment: Comment;
-  }>();
-  const bookStore = useBookStore()
-  const deleteComment = (id: string) => bookStore.removeComment(id)
-  const parsedDate = computed(() =>
-    new Intl.DateTimeFormat("en-US").format(new Date(props.comment.createdAt))
-  )
+import { XCircleIcon } from '@heroicons/vue/outline/index.js'
+import { useBookStore } from '~~/store/book'
+import { Comment } from '~~/types/comment'
+const props = defineProps<{
+  comment: Comment
+}>()
+const bookStore = useBookStore()
+const deleteComment = (id: string) => bookStore.removeComment(id)
+const parsedDate = computed(() =>
+  new Intl.DateTimeFormat('en-US').format(new Date(props.comment.createdAt))
+)
 </script>

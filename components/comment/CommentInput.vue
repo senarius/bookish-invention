@@ -18,27 +18,27 @@
       :disabled="loading"
       @click="$emit('save')"
     >
-      {{ loading ? "Loading..." : "Add" }}
+      {{ loading ? 'Loading...' : 'Add' }}
     </button>
   </div>
 </template>
 
 <script lang="ts" setup>
-  const props = defineProps<{
-    modelValue: string
-    error: boolean
-    loading: boolean
-  }>();
-  const emit = defineEmits<{
-    (e: "update:modelValue", value: string): void
-    (e: "save"): void
-  }>();
-  const localCommentValue = computed({
-    get() {
-      return props.modelValue;
-    },
-    set(value: string) {
-      emit("update:modelValue", value)
-    },
-  })
+const props = defineProps<{
+  modelValue: string
+  error: boolean
+  loading: boolean
+}>()
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+  (e: 'save'): void
+}>()
+const localCommentValue = computed({
+  get() {
+    return props.modelValue
+  },
+  set(value: string) {
+    emit('update:modelValue', value)
+  },
+})
 </script>

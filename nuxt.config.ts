@@ -19,8 +19,8 @@ export default defineNuxtConfig({
       },
     },
   },
-  // routeRules: {
-  //   '/**': { headers: { 'Access-Control-Allow-Origin': '*' } },
-  //   '/api/v1/**': { cors: true },
-  // },
+  routeRules: {
+    '/**': { headers: { 'Access-Control-Allow-Origin': '*' } },
+    '/api/v1/**': { cors: true },
+  },
 })

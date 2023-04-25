@@ -28,4 +28,5 @@ amplify-gradle-config.json
 amplifytools.xcconfig
 .secret-*
 **.sample
+coverage
 #amplify-do-not-edit-end
